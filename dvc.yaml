@@ -1,53 +1,49 @@
 stages:
   data_ingestion:
-    cmd: python src/data/data_ingestion.py
+    cmd: python src\data\data_ingestion.py
     deps:
-    - src/data/data_ingestion.py
+    - src\data\data_ingestion.py
     outs:
-    - data/raw/test.csv
-    - data/raw/train.csv
+    - data\raw\test.csv
+    - data\raw\train.csv
     params:
     - data_ingestion.test_size
-
-
   data_preprocessing:
-    cmd: python src/data/data_preprocessing.py
+    cmd: python src\data\data_preprocessing.py
     deps:
-    - src/data/data_preprocessing.py
-    - data/raw/test.csv
-    - data/raw/train.csv
+    - data\raw\test.csv
+    - data\raw\train.csv
+    - src\data\data_preprocessing.py
     outs:
-    - data/processed/train.csv
-    - data/processed/test.csv
-
+    - data\processed\test.csv
+    - data\processed\train.csv
   feature_engg:
     cmd: python src/features/feature_engg.py
     deps:
-    - src/features/feature_engg.py
-    - data/processed/train.csv
     - data/processed/test.csv
+    - data/processed/train.csv
+    - src/features/feature_engg.py
     outs:
-    - data/interim/train_bow.csv
-    - data/interim/test_bow.csv
+    - data/interim/test_tfidf.csv
+    - data/interim/train_tfidf.csv
     params:
     - feature_engg.max_features
-  modelling:
+  model_training:
     cmd: python src/models/modelling.py
     deps:
+    - data/interim/test_tfidf.csv
+    - data/interim/train_tfidf.csv
     - src/models/modelling.py
-    - data/interim/train_bow.csv
     outs:
     - models/random_forest_model.pkl
     params:
     - modelling.n_estimators
     - modelling.max_depth
-
   model_evaluation:
     cmd: python src/models/model_evaluation.py
     deps:
+    - data/interim/test_tfidf.csv
     - src/models/model_evaluation.py
     - models/random_forest_model.pkl
-    - data/interim/test_bow.csv
     outs:
-    - reports/evaluation_metrics.json
-
+    - reports/metrics.json
